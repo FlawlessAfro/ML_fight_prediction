@@ -9,7 +9,7 @@ import array
 # Load the trained model
 svm_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\svm_model.pkl')
 
-df = pd.read_csv('../df_ufc_masters_w_reversed.csv')
+df = pd.read_csv(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\reversed_ss_ufc_masters.csv')
 
 features = ['B_age',
         'R_age',
@@ -62,7 +62,9 @@ def update_output(n_clicks, fighter1, fighter2):
             fighter2_data = df[df['R_fighter'] == fighter2][features].iloc[0]
 
             # Combine features into a single array for prediction
-            combined_features = np.array([fighter1_data.tolist() + fighter2_data.tolist()])
+            match_data = df[(df['B_fighter'] == fighter1) & (df['R_fighter'] == fighter2)][features].iloc[0]
+            combined_features = np.array([match_data.tolist()])
+
 
             # Predict the probability using the SVM model
             probability = svm_model.predict_proba(combined_features)
