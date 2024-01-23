@@ -1,0 +1,1 @@
+host=summer22data.postgres.database.azure.com user=student_dennis dbname=daily_dennis password=dennis
