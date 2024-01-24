@@ -45,7 +45,8 @@ app.layout = html.Div([
         value=None  # Default value
     ),
     html.Button('Submit', id='submit-button', n_clicks=0),
-    html.Div(id='probability-output')
+    html.Div(id='probability-output'),
+    html.Img(src="assets/bank_end_value_plot.png")
 ])
 
 # Define the callback
