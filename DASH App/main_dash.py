@@ -11,6 +11,8 @@ randomforest_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Mo
 
 fighters_df = pd.read_csv('CSV Files/df_ufc_masters_w_reversed.csv')
 
+odds_df = pd.read_csv(r'C:\Users\DY\Documents\GitHub\UFCproject\CSV Files\odds_reversed.csv')
+
 features = [
     'r_avg_sig_str_landed',
     'r_avg_sig_str_pct',
@@ -79,7 +81,17 @@ def predict_victory(n_clicks, fighter1, fighter2):
             # Assuming you want the probability of the first class (e.g., fighter1 winning)
             winning_probability = probability[0][0] * 100  # Convert to percentage
 
-            return f"The probability of {fighter1} winning over {fighter2} is {winning_probability:.2f}%"
+            # New: Fetch and display odds
+            odds_info = odds_df[(odds_df['fighter_a'] == fighter1) & (odds_df['fighter_b'] == fighter2)]
+            if odds_info.empty:
+                odds_message = "No odds data available for this matchup."
+            else:
+                odds_message = "Odds:\n" + "\n".join(
+                    [f"{row['bookmaker']}: {row['odds_a']} - {row['odds_b']}" for _, row in odds_info.iterrows()]
+                )
+            
+            # Combine probability message and odds message
+            return f"The probability of {fighter1} winning over {fighter2} is {winning_probability:.2f}%.\n{odds_message}"
         except Exception as e:
             return f"An error occurred: {e}"
     return 'Select two fighters'
