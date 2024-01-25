@@ -12,23 +12,24 @@ random_forest_model = joblib.load('../ML Model Testing/random_forest.pkl')
 df = pd.read_csv('../CSV Files/df_ufc_masters_w_reversed.csv')
 
 features = [
-    'B_avg_SIG_STR_landed',
-    'B_avg_SIG_STR_pct',
-    'B_avg_SUB_ATT',
-    'B_avg_TD_landed',
-    'B_avg_TD_pct',
-    'R_avg_SIG_STR_landed',
-    'R_avg_SIG_STR_pct',
-    'R_avg_SUB_ATT',
-    'R_avg_TD_landed',
-    'R_avg_TD_pct',
-    'B_Height_cms',
-    'B_Reach_cms',
-    'R_Height_cms',
-    'R_Reach_cms', 
-    'R_age',
-    'B_age'
-]
+    'r_avg_sig_str_landed',
+    'r_avg_sig_str_landed',
+    'r_avg_sig_str_pct',
+    'r_avg_sub_att',
+    'r_avg_td_landed',
+    'r_avg_td_pct',
+    'r_height_cms',
+    'r_reach_cms', 
+    'r_age',
+    'b_avg_sig_str_landed',
+    'b_avg_sig_str_landed',
+    'b_avg_sig_str_pct',
+    'b_avg_sub_att',
+    'b_avg_td_landed',
+    'b_avg_td_pct',
+    'b_height_cms',
+    'b_reach_cms', 
+    'b_age']
 
 app = dash.Dash(__name__)
 
@@ -36,12 +37,12 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
     dcc.Dropdown(
         id='fighter-1-dropdown',
-        options=[{'label': fighter, 'value': fighter} for fighter in df['B_fighter'].unique()],
+        options=[{'label': fighter, 'value': fighter} for fighter in df['b_fighter'].unique()],
         value=None  # Default value
     ),
     dcc.Dropdown(
         id='fighter-2-dropdown',
-        options=[{'label': fighter, 'value': fighter} for fighter in df['R_fighter'].unique()],
+        options=[{'label': fighter, 'value': fighter} for fighter in df['r_fighter'].unique()],
         value=None  # Default value
     ),
     html.Button('Submit', id='submit-button', n_clicks=0),
@@ -61,11 +62,11 @@ def update_output(n_clicks, fighter1, fighter2):
         try:
             # Extract the feature values for the selected fighters from the DataFrame
             # This is a placeholder logic. You'll need to replace it with actual data extraction logic
-            fighter1_data = df[df['B_fighter'] == fighter1][features].iloc[0]
-            fighter2_data = df[df['R_fighter'] == fighter2][features].iloc[0]
+            fighter1_data = df[df['b_fighter'] == fighter1][features].iloc[0]
+            fighter2_data = df[df['r_fighter'] == fighter2][features].iloc[0]
 
             # Combine features into a single array for prediction
-            match_data = df[(df['B_fighter'] == fighter1) & (df['R_fighter'] == fighter2)][features].iloc[0]
+            match_data = df[(df['b_fighter'] == fighter1) & (df['r_fighter'] == fighter2)][features].iloc[0]
             combined_features = np.array([match_data.tolist()])
 
 
