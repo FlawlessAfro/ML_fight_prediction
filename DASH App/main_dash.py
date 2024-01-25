@@ -13,6 +13,8 @@ fighters_df = pd.read_csv('CSV Files/df_ufc_masters_w_reversed.csv')
 
 odds_df = pd.read_csv(r'C:\Users\DY\Documents\GitHub\UFCproject\CSV Files\odds_reversed.csv')
 
+finish_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\finish_method.pkl')
+
 features = [
     'r_avg_sig_str_landed',
     'r_avg_sig_str_pct',
@@ -81,6 +83,12 @@ def predict_victory(n_clicks, fighter1, fighter2):
             # Assuming you want the probability of the first class (e.g., fighter1 winning)
             winning_probability = probability[0][0] * 100  # Convert to percentage
 
+            # Predict finish type using the finish model
+            finish_prediction = finish_model.predict(combined_features)
+            # Convert numerical prediction to string (adjust based on your model)
+            finish_types = {0: 'Submission', 1: 'KO', 2: 'Decision'}
+            finish_type_str = finish_types.get(finish_prediction[0], "Unknown Finish")
+
             # New: Fetch and display odds
             odds_info = odds_df[(odds_df['fighter_a'] == fighter1) & (odds_df['fighter_b'] == fighter2)]
             if odds_info.empty:
@@ -90,8 +98,9 @@ def predict_victory(n_clicks, fighter1, fighter2):
                     [f"{row['bookmaker']}: {row['odds_a']} - {row['odds_b']}" for _, row in odds_info.iterrows()]
                 )
             
-            # Combine probability message and odds message
-            return f"The probability of {fighter1} winning over {fighter2} is {winning_probability:.2f}%.\n{odds_message}"
+            # Combine probability message, odds message, and finish type prediction
+            result_message = f"The probability of {fighter1} winning over {fighter2} is {winning_probability:.2f}%.\nPredicted Finish: {finish_type_str}\n{odds_message}"
+            return result_message
         except Exception as e:
             return f"An error occurred: {e}"
     return 'Select two fighters'
