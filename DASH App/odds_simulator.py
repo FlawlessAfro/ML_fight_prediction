@@ -53,7 +53,7 @@ def get_odds():
 #bank, bet_amount
 def simulating():
     result_df = get_odds()
-    threshold_values = range(0, 20) 
+    threshold_values = range(0, 50) 
     end_value = []
 
     for threshold in threshold_values:

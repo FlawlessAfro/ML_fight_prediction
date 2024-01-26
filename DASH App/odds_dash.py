@@ -24,8 +24,11 @@ app.layout = html.Div([
     # Output for displaying the result from find_profit()
     html.Div(id='profit-info'),
 
-    # Image (if needed)
-    html.Img(src="assets/bank_end_value_plot.png"),
+    # Images displayed side by side
+    html.Div([
+        html.Img(src="assets/xgb_bank_end_value1.png", style={'width': '48%', 'display': 'inline-block'}),
+        html.Img(src="assets/xgb_bank_end_value2.png", style={'width': '48%', 'display': 'inline-block'}),
+    ]),
 ])
 
 # Callback to update the profit information based on the bet amount
