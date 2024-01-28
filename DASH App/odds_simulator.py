@@ -112,4 +112,6 @@ def find_profit(bet_amount):
 
         end_value.append(bank)
         max_bank= max(end_value)
-    return max_bank
+        max_index = end_value.index(max(end_value))
+
+    return max_bank, max_index

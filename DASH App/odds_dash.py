@@ -5,31 +5,39 @@ from dash.dependencies import Input, Output
 from odds_simulator import find_profit, simulating, get_odds  # Import all three functions
 
 # Define the layout of the app
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, url_base_pathname='/odds_page/')
 
-app.layout = html.Div([
-    html.H1("Odds Simulator"),
-    
-    # Input for the user to enter the bet amount
-    dcc.Input(
-        id='bet-amount-input',
-        type='number',
-        placeholder='Enter Bet Amount',
-        value=100  # Default value
-    ),
 
-    # Button to trigger the calculation
-    html.Button('Calculate', id='calculate-button'),
+app.layout = html.Div(
+    style={'textAlign': 'center'},  # Center the content
+    children=[
+        html.H1("Odds Simulator"),
+        
+        # Input for the user to enter the bet amount
+        dcc.Input(
+            id='bet-amount-input',
+            type='number',
+            placeholder='Enter Bet Amount',
+            value=100  # Default value
+        ),
 
-    # Output for displaying the result from find_profit()
-    html.Div(id='profit-info'),
+        # Button to trigger the calculation
+        html.Button('Calculate', id='calculate-button'),
 
-    # Images displayed side by side
-    html.Div([
-        html.Img(src="assets/xgb_bank_end_value1.png", style={'width': '48%', 'display': 'inline-block'}),
-        html.Img(src="assets/xgb_bank_end_value2.png", style={'width': '48%', 'display': 'inline-block'}),
-    ]),
-])
+        # Output for displaying the result from find_profit()
+        html.Div(id='profit-info', style={'fontSize': 20}),  # Set the font size to 20
+
+        html.H1("Visualisation"),
+        # Images displayed side by side
+        html.Div([
+            html.Img(src="assets/xgb_bank_end_value1.png", style={'width': '33%', 'display': 'inline-block'}),
+            html.Img(src="assets/xgb_bank_end_value2.png", style={'width': '33%', 'display': 'inline-block'}),
+            html.Img(src="assets/xgb_wins_losses.png", style={'width': '33%', 'display': 'inline-block'}),
+        ]),
+        dcc.Link('Go to Odds Dashboard (App 1)', href='/main_page/'),
+
+    ]
+)
 
 # Callback to update the profit information based on the bet amount
 @app.callback(
@@ -51,7 +59,7 @@ def update_profit_info(n_clicks, bet_amount):
     # Call the find_profit function with the provided bet_amount
     max_bank = find_profit(bet_amount)
     
-    return f"Max Bank Value for Bet Amount {bet_amount}: {max_bank}, Simulation Result: {sim_result}"
+    return f"Maximal profit with bet size: {bet_amount} is {max_bank}"
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=8080)

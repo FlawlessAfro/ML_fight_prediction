@@ -7,9 +7,9 @@ from sklearn.linear_model import LogisticRegression
 import array
 
 # Load the trained model
-svm_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\svm_model.pkl')
+svm_model = joblib.load('../ML Model Testing/svm_model.pkl')
 
-df = pd.read_csv(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\reversed_ss_ufc_masters.csv')
+df = pd.read_csv('../ML Model Testing/reversed_ss_ufc_masters.csv')
 
 features = ['B_age',
         'R_age',
