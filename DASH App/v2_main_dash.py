@@ -117,11 +117,15 @@ app.layout = html.Div([
         options=[{'label': fighter, 'value': fighter} for fighter in fighters_df['r_fighter'].unique()],
         value=None  # Default value
     ),
-    html.Img(id='fighter-1-img', style={'width': '10%', 'display': 'inline-block', 'marginLeft': '25%'}),  # Image for fighter 1
-    html.Img(id='fighter-2-img', style={'width': '10%', 'display': 'inline-block', 'marginLeft': '25%'}),  # Image for fighter 2
+    html.Div([
+        html.Img(id='fighter-1-img', style={'width': '200px'}),
+        html.Div(id='fighter-1-info', style={'textAlign': 'center'})
+    ], style={'display': 'inline-block', 'marginRight': '50px'}),
 
-    html.Div(id='fighter-1-info'),  # Div to display fighter 1's additional info
-    html.Div(id='fighter-2-info'),  # Div to display fighter 2's additional info
+    html.Div([
+        html.Img(id='fighter-2-img', style={'width': '200px'}),
+        html.Div(id='fighter-2-info', style={'textAlign': 'center'})
+    ], style={'display': 'inline-block'}),
 
     dcc.Graph(id='radar-chart'),  # Radar chart component
     html.Button('Submit', id='submit-button', n_clicks=0),
