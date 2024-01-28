@@ -20,29 +20,37 @@ finish_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Te
 
 skills = ['r_avg_sig_str_landed', 'r_avg_sig_str_pct', 'r_avg_sub_att', 'r_avg_td_landed', 'r_avg_td_pct']
 
-def get_ufc_fighter_image_url(fighter_name):
+def get_ufc_fighter_info(fighter_name):
     # Convert the fighter's name to the format used in the UFC URL
-    # This may require some customization depending on how the UFC formats URLs
     url_name = fighter_name.lower().replace(' ', '-')
- 
+
     # URL of the UFC fighter's page
     url = f"https://www.ufc.com/athlete/{url_name}"
- 
+
     # Send a request to the website
     response = requests.get(url)
     if response.status_code != 200:
         return None  # Page not found or error in request
- 
+
     # Parse the HTML content
     soup = BeautifulSoup(response.text, 'html.parser')
- 
-    # Find the image URL - you need to inspect the page to find the correct class or ID
-    # This is just an example and might need adjustment
+
+    # Initialize a dictionary to store fighter information
+    fighter_info = {}
+
+    # Find the image URL
     image_tag = soup.find('img', {'class': 'hero-profile__image'})
-    if image_tag and 'src' in image_tag.attrs:
-        return image_tag['src']
-    else:
-        return None
+    fighter_info['image_url'] = image_tag['src'] if image_tag and 'src' in image_tag.attrs else None
+
+    # Find the weight class
+    weight_class_tag = soup.find('p', {'class': 'hero-profile__division-title'})
+    fighter_info['weight_class'] = weight_class_tag.get_text() if weight_class_tag else None
+
+    # Find the win/loss record
+    record_tag = soup.find('p', {'class': 'hero-profile__division-body'})
+    fighter_info['record'] = record_tag.get_text() if record_tag else None
+
+    return fighter_info
 
 def create_radar_chart(fighter1, fighter2, skills):
     # Extract skills data for the two fighters
@@ -112,6 +120,9 @@ app.layout = html.Div([
     html.Img(id='fighter-1-img', style={'width': '10%', 'display': 'inline-block', 'marginLeft': '25%'}),  # Image for fighter 1
     html.Img(id='fighter-2-img', style={'width': '10%', 'display': 'inline-block', 'marginLeft': '25%'}),  # Image for fighter 2
 
+    html.Div(id='fighter-1-info'),  # Div to display fighter 1's additional info
+    html.Div(id='fighter-2-info'),  # Div to display fighter 2's additional info
+
     dcc.Graph(id='radar-chart'),  # Radar chart component
     html.Button('Submit', id='submit-button', n_clicks=0),
     html.Div(id='probability-output')
@@ -122,7 +133,9 @@ app.layout = html.Div([
     [dash.dependencies.Output('probability-output', 'children'),
      dash.dependencies.Output('radar-chart', 'figure'),
      dash.dependencies.Output('fighter-1-img', 'src'),
-     dash.dependencies.Output('fighter-2-img', 'src')],
+     dash.dependencies.Output('fighter-2-img', 'src'),
+     dash.dependencies.Output('fighter-1-info', 'children'),
+     dash.dependencies.Output('fighter-2-info', 'children')],
     [dash.dependencies.Input('submit-button', 'n_clicks')],
     [dash.dependencies.State('fighter-1-dropdown', 'value'),
      dash.dependencies.State('fighter-2-dropdown', 'value')]
@@ -130,16 +143,16 @@ app.layout = html.Div([
 def predict_victory(n_clicks, fighter1, fighter2):
     if n_clicks > 0:
         try:
-            # Ensure the fighters are in the DataFrame
+            # Check if the fighters are in the DataFrame
             if fighter1 not in fighters_df['r_fighter'].values or fighter2 not in fighters_df['r_fighter'].values:
-                return "One or both fighters not found in the dataset.", go.Figure(), None, None
+                return "One or both fighters not found in the dataset.", go.Figure(), None, None, "", ""
 
             # Check if data exists for the selected fighters
             fighter1_data = fighters_df[fighters_df['r_fighter'] == fighter1]
             fighter2_data = fighters_df[fighters_df['r_fighter'] == fighter2]
 
             if fighter1_data.empty or fighter2_data.empty:
-                return "Data not available for one or both fighters.", go.Figure(), None, None
+                return "Data not available for one or both fighters.", go.Figure(), None, None, "", ""
 
             # Retrieve fighters' stats
             fighter1_stats = fighter1_data.iloc[0]
@@ -155,43 +168,40 @@ def predict_victory(n_clicks, fighter1, fighter2):
             # Combine features
             combined_features = np.hstack((fighter1_features, fighter2_features))
 
-            # Predict probability
+            # Predict probability and finish type
             probability = randomforest_model.predict_proba(combined_features)
-            # Assuming you want the probability of the first class (e.g., fighter1 winning)
-            winning_probability = probability[0][0] * 100  # Convert to percentage
-
-            # Predict finish type using the finish model
+            winning_probability = probability[0][0] * 100
             finish_prediction = finish_model.predict(combined_features)
-            # Convert numerical prediction to string (adjust based on your model)
             finish_types = {0: 'Submission', 1: 'KO', 2: 'Decision'}
             finish_type_str = finish_types.get(finish_prediction[0], "Unknown Finish")
 
-            # New: Fetch and display odds
+            # Fetch and display odds
             odds_info = odds_df[(odds_df['fighter_a'] == fighter1) & (odds_df['fighter_b'] == fighter2)]
-            if odds_info.empty:
-                odds_message = "No odds data available for this matchup."
-            else:
-                odds_message = "Odds:\n" + "\n".join(
-                    [f"{row['bookmaker']}: {row['odds_a']} - {row['odds_b']}" for _, row in odds_info.iterrows()]
-                )
-            
-            # Combine probability message, odds message, and finish type prediction
+            odds_message = "Odds:\n" + "\n".join(
+                [f"{row['bookmaker']}: {row['odds_a']} - {row['odds_b']}" for _, row in odds_info.iterrows()]
+            ) if not odds_info.empty else "No odds data available for this matchup."
+
+            # Construct the result message
             result_message = f"The probability of {fighter1} winning over {fighter2} is {winning_probability:.2f}%.\nPredicted Finish: {finish_type_str}\n{odds_message}"
 
             # Radar chart creation
             radar_chart = create_radar_chart(fighter1, fighter2, skills)
 
-            # Fetch image URLs for fighters using the get_ufc_fighter_image_url function
-            fighter1_img = get_ufc_fighter_image_url(fighter1)
-            fighter2_img = get_ufc_fighter_image_url(fighter2)
+            # Fetch additional information for fighters
+            fighter1_info = get_ufc_fighter_info(fighter1)
+            fighter2_info = get_ufc_fighter_info(fighter2)
 
-            return result_message, radar_chart, fighter1_img, fighter2_img
+            # Construct information display string
+            fighter1_display = f"{fighter1}\nWeight Class: {fighter1_info['weight_class']}\nRecord: {fighter1_info['record']}" if fighter1_info else ""
+            fighter2_display = f"{fighter2}\nWeight Class: {fighter2_info['weight_class']}\nRecord: {fighter2_info['record']}" if fighter2_info else ""
+
+            return result_message, radar_chart, fighter1_info.get('image_url', None), fighter2_info.get('image_url', None), fighter1_display, fighter2_display
 
         except Exception as e:
-            return f"An error occurred: {e}", go.Figure(), None, None
+            return f"An error occurred: {e}", go.Figure(), None, None, "", ""
 
     # Default return when no fighters are selected
-    return 'Select two fighters', go.Figure(), None, None
+    return 'Select two fighters', go.Figure(), None, None, "", ""
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=8080)
