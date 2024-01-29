@@ -10,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # Load the trained model
-randomforest_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\xgb_model.pkl')
+randomforest_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\random_forest.pkl')
 
 fighters_df = pd.read_csv('CSV Files/unprocessed_fights.csv')
 
@@ -116,6 +116,7 @@ app.layout = html.Div([
         id='fighter-2-dropdown',
         options=[{'label': fighter, 'value': fighter} for fighter in fighters_df['r_fighter'].unique()],
         value=None  # Default value
+    
     ),
     html.Button('Submit', id='submit-button', n_clicks=0),
     html.Div([
