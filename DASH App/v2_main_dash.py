@@ -193,21 +193,21 @@ def predict_victory(n_clicks, fighter1, fighter2):
             # Radar chart creation
             radar_chart = create_radar_chart(fighter1, fighter2, skills)
 
-            # Fetch additional information for fighters
+            
             fighter1_info = get_ufc_fighter_info(fighter1)
             fighter2_info = get_ufc_fighter_info(fighter2)
 
-            # Construct information display string
+            
             fighter1_display = f"Weight Class: {fighter1_info['weight_class']}\nRecord: {fighter1_info['record']}" if fighter1_info else ""
             fighter2_display = f"Weight Class: {fighter2_info['weight_class']}\nRecord: {fighter2_info['record']}" if fighter2_info else ""
 
-            # Return odds_message separately
+            
             return result_message, radar_chart, fighter1_info.get('image_url', None), fighter2_info.get('image_url', None), fighter1_display, fighter2_display, odds_message
 
         except Exception as e:
             return f"An error occurred: {e}", go.Figure(), None, None, "", "", ""
 
-    # Default return when no fighters are selected
+    
     return 'Select two fighters', go.Figure(), None, None, "", "", ""
 
 if __name__ == '__main__':
