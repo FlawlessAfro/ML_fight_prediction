@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 from odds_simulator import find_profit, simulating, get_odds  # Import all three functions
 
 # Define the layout of the app
-app = dash.Dash(__name__, url_base_pathname='/odds_page/')
+app = dash.Dash(__name__)
 
 
 app.layout = html.Div(
@@ -34,7 +34,6 @@ app.layout = html.Div(
             html.Img(src="assets/xgb_bank_end_value2.png", style={'width': '33%', 'display': 'inline-block'}),
             html.Img(src="assets/xgb_wins_losses.png", style={'width': '33%', 'display': 'inline-block'}),
         ]),
-        dcc.Link('Go to Odds Dashboard (App 1)', href='/main_page/'),
 
     ]
 )
