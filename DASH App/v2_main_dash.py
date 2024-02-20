@@ -10,13 +10,14 @@ import requests
 from bs4 import BeautifulSoup
 
 # Load the trained model
-randomforest_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\xgb_model.pkl')
+
+randomforest_model = joblib.load('ML Model Testing/xgb_model.pkl')
 
 fighters_df = pd.read_csv('CSV Files/unprocessed_fights.csv')
 
-odds_df = pd.read_csv(r'C:\Users\DY\Documents\GitHub\UFCproject\CSV Files\odds_reversed.csv')
+odds_df = pd.read_csv('CSV Files/odds_reversed.csv')
 
-finish_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\finish_method.pkl')
+finish_model = joblib.load('ML Model Testing/finish_method.pkl')
 
 skills = ['r_avg_sig_str_landed', 'r_avg_sig_str_pct', 'r_avg_sub_att', 'r_avg_td_landed', 'r_avg_td_pct']
 
