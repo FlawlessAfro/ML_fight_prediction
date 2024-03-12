@@ -10,13 +10,14 @@ import requests
 from bs4 import BeautifulSoup
 
 # Load the trained model
-randomforest_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\random_forest.pkl')
+
+randomforest_model = joblib.load('ML Model Testing/xgb_model.pkl')
 
 fighters_df = pd.read_csv('CSV Files/unprocessed_fights.csv')
 
-odds_df = pd.read_csv(r'C:\Users\DY\Documents\GitHub\UFCproject\CSV Files\odds_reversed.csv')
+odds_df = pd.read_csv('CSV Files/odds_reversed.csv')
 
-finish_model = joblib.load(r'C:\Users\DY\Documents\GitHub\UFCproject\ML Model Testing\finish_method.pkl')
+finish_model = joblib.load('ML Model Testing/finish_method.pkl')
 
 skills = ['r_avg_sig_str_landed', 'r_avg_sig_str_pct', 'r_avg_sub_att', 'r_avg_td_landed', 'r_avg_td_pct']
 
@@ -53,6 +54,15 @@ def get_ufc_fighter_info(fighter_name):
     return fighter_info
 
 def create_radar_chart(fighter1, fighter2, skills):
+    # Alias mapping for skill names
+    skill_aliases = {
+        'r_avg_sig_str_landed': 'Avg Significant Strikes Landed',
+        'r_avg_sig_str_pct': 'Avg Significant Strikes Absorbed',
+        'r_avg_sub_att': 'Avg Submission Attempts',
+        'r_avg_td_landed': 'Avg Takedowns Landed',
+        'r_avg_td_pct': 'Avg Takedowns Defended'
+    }
+
     # Extract skills data for the two fighters
     f1_skills = fighters_df[fighters_df['r_fighter'] == fighter1][skills].iloc[0].tolist()
     f2_skills = fighters_df[fighters_df['r_fighter'] == fighter2][skills].iloc[0].tolist()
@@ -62,14 +72,14 @@ def create_radar_chart(fighter1, fighter2, skills):
 
     fig.add_trace(go.Scatterpolar(
         r=f1_skills,
-        theta=skills,
+        theta=[skill_aliases[skill] for skill in skills],  # Apply aliases here
         fill='toself',
         name=fighter1
     ))
 
     fig.add_trace(go.Scatterpolar(
         r=f2_skills,
-        theta=skills,
+        theta=[skill_aliases[skill] for skill in skills],  # Apply aliases here
         fill='toself',
         name=fighter2
     ))
@@ -78,12 +88,13 @@ def create_radar_chart(fighter1, fighter2, skills):
         polar=dict(
             radialaxis=dict(
                 visible=True,
-                range=[0, 4]  # Adjust range based on your skill metrics
+                range=[0, max(f1_skills + f2_skills) * 1.1]  # Adjust to automatically scale the range based on max skill values
             )),
         showlegend=True
     )
 
     return fig
+
 
 features = [
     'r_avg_sig_str_landed',
@@ -116,7 +127,6 @@ app.layout = html.Div([
         id='fighter-2-dropdown',
         options=[{'label': fighter, 'value': fighter} for fighter in fighters_df['r_fighter'].unique()],
         value=None  # Default value
-    
     ),
     html.Button('Submit', id='submit-button', n_clicks=0),
     html.Div([
@@ -194,21 +204,21 @@ def predict_victory(n_clicks, fighter1, fighter2):
             # Radar chart creation
             radar_chart = create_radar_chart(fighter1, fighter2, skills)
 
-            # Fetch additional information for fighters
+            
             fighter1_info = get_ufc_fighter_info(fighter1)
             fighter2_info = get_ufc_fighter_info(fighter2)
 
-            # Construct information display string
+            
             fighter1_display = f"Weight Class: {fighter1_info['weight_class']}\nRecord: {fighter1_info['record']}" if fighter1_info else ""
             fighter2_display = f"Weight Class: {fighter2_info['weight_class']}\nRecord: {fighter2_info['record']}" if fighter2_info else ""
 
-            # Return odds_message separately
+            
             return result_message, radar_chart, fighter1_info.get('image_url', None), fighter2_info.get('image_url', None), fighter1_display, fighter2_display, odds_message
 
         except Exception as e:
             return f"An error occurred: {e}", go.Figure(), None, None, "", "", ""
 
-    # Default return when no fighters are selected
+    
     return 'Select two fighters', go.Figure(), None, None, "", "", ""
 
 if __name__ == '__main__':
